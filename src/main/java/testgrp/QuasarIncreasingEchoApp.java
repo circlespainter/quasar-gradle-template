@@ -20,7 +20,8 @@ public class QuasarIncreasingEchoApp {
         final IntChannel increasingToEcho = Channels.newIntChannel(0); // Synchronizing channel (buffer = 0)
         final IntChannel echoToIncreasing = Channels.newIntChannel(0); // Synchronizing channel (buffer = 0)
 
-        Fiber<Integer> increasing = new Fiber<>("INCREASER", new SuspendableCallable<Integer>() { @Override public Integer run() throws SuspendExecution, InterruptedException {
+        Fiber<Integer> increasing = new Fiber<Integer>() {
+          @Override public Integer run() throws SuspendExecution, InterruptedException {
             ////// The following is enough to test instrumentation of synchronizing methods
             // synchronized(new Object()) {}
 
@@ -37,9 +38,11 @@ public class QuasarIncreasingEchoApp {
             System.out.println("INCREASER closing channel and exiting");
             increasingToEcho.close();
             return curr;
-        } }).start();
+          }
+        }.start();
 
-        Fiber<Void> echo = new Fiber<Void>("ECHO", new SuspendableRunnable() { @Override public void run() throws SuspendExecution, InterruptedException {
+        Fiber<Void> echo = new Fiber<Void>() {
+          @Override public Void run() throws SuspendExecution, InterruptedException {
             Integer curr;
             while (true) {
                 Fiber.sleep(1000);
@@ -52,10 +55,11 @@ public class QuasarIncreasingEchoApp {
                 } else {
                     System.out.println("ECHO detected closed channel, closing and exiting");
                     echoToIncreasing.close();
-                    return;
+                    return null;
                 }
             }
-        } }).start();
+          }
+        }.start();
 
         try {
             increasing.join();
