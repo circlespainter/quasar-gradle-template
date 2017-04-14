@@ -34,10 +34,9 @@ fun doAll(): Int? {
     })).start()
 
     val echo = Fiber(SuspendableCallable(@Suspendable {
-        val curr: Int?
         while (true) {
             Fiber.sleep(1000)
-            curr = increasingToEcho.receive()
+            val curr : Int? = increasingToEcho.receive()
             println("ECHO received: " + curr)
 
             if (curr != null) {
